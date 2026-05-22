@@ -259,4 +259,26 @@
         }
     }
 
+    .footerLogoContainer {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+    }
+
+    .logoWrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+        flex: 0 0 auto;
+    }
+
+    .powered-by-logo {
+        height: 2rem;
+        width: auto;
+        display: block;
+    }
 }

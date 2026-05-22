@@ -8,7 +8,8 @@ import {
   TextInput,
   Tile,
 } from "@carbon/react";
-import { ArrowRight } from "@carbon/react/icons";
+// eslint-disable-next-line no-restricted-imports
+import { ArrowRight } from "@carbon/icons-react";
 import { useTranslation } from "react-i18next";
 import {
   clearCurrentUser,
@@ -79,13 +80,36 @@ const Login: React.FC<LoginReferrer> = () => {
                         provider.attributeType?.uuid ===
                         config.provider.attributeTypeUUID
                     )?.value?.uuid;
+
+                  const locationUuidToUse =
+                    (typeof userLocationUuid === "string"
+                      ? userLocationUuid.trim()
+                      : "") ||
+                    (typeof (config as any)?.defaultLoginLocationUuid ===
+                    "string"
+                      ? (config as any).defaultLoginLocationUuid.trim()
+                      : "");
+
                   setIsLoggingIn(false);
-                  setHasUserLocation(true);
+
+                  if (!locationUuidToUse) {
+                    // No location available - don't proceed
+                    setHasUserLocation(false);
+                    setErrorMessage(
+                      "No login location is available for this account. Please contact an administrator."
+                    );
+                    return;
+                  }
 
                   await setSessionLocation(
-                    userLocationUuid,
+                    locationUuidToUse,
                     new AbortController()
                   );
+
+                  setHasUserLocation(true);
+                } else {
+                  setIsLoggingIn(false);
+                  setErrorMessage("Unable to load provider details.");
                 }
               },
               (error) => {
@@ -104,8 +128,9 @@ const Login: React.FC<LoginReferrer> = () => {
         }
       );
     },
-    [config.provider.attributeTypeUUID, password, username]
+    [config.provider.attributeTypeUUID, password, username, config]
   );
+
   const handleAuthenticatedUser = () => {
     clearCurrentUser();
     refetchCurrentUser().then(() => {
@@ -164,7 +189,9 @@ const Login: React.FC<LoginReferrer> = () => {
             <Logo className={styles.logo} />
           </div>
           <Tile className={styles["login-card"]}>
-            <div className={styles.facilityNameContainer}>{facilityName}</div>
+            <div className={styles.facilityNameContainer}>
+              {facilityName || config.healthCenterName}
+            </div>
             {errorMessage && (
               <InlineNotification
                 className={styles.errorMessage}
@@ -259,9 +286,43 @@ const Login: React.FC<LoginReferrer> = () => {
               <span className={styles.poweredByTxt}>
                 {t("poweredBy", "Powered by")}
               </span>
-              <svg className={styles["powered-by-logo"]}>
-                <use xlinkHref={`#${config?.footerOpenMRSLogo}`}></use>
-              </svg>
+
+              <div className={styles.footerLogoContainer}>
+                {(config?.footerLogos?.length
+                  ? config.footerLogos
+                  : [{ type: "sprite", id: config?.footerOpenMRSLogo }]
+                ).map((logo, index) => {
+                  return (
+                    <div key={index} className={styles.logoWrapper}>
+                      {typeof logo === "string" && (
+                        <div className={styles.logoItem}>
+                          <svg className={styles["powered-by-logo"]}>
+                            <use xlinkHref={`#${logo}`} />
+                          </svg>
+                        </div>
+                      )}
+
+                      {typeof logo !== "string" && logo.type === "sprite" && (
+                        <div className={styles.logoItem}>
+                          <svg className={styles["powered-by-logo"]}>
+                            <use xlinkHref={`#${logo.id}`} />
+                          </svg>
+                        </div>
+                      )}
+
+                      {typeof logo !== "string" && logo.type === "image" && (
+                        <div className={styles.logoItem}>
+                          <img
+                            src={logo.src}
+                            alt={logo.alt}
+                            className={styles["powered-by-logo"]}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,17 @@
 import { validators, Type } from "@openmrs/esm-framework";
 
 export const configSchema = {
+  healthCenterName: {
+    _type: Type.String,
+    _default: "Health Center Name",
+    _description: "Global property key for facility name",
+  },
+  defaultLoginLocationUuid: {
+    _type: Type.String,
+    _default: "629d78e9-93e5-43b0-ad8a-48313fd99117",
+    _description:
+      "Default session location UUID used when user has not selected a location.",
+  },
   provider: {
     type: {
       _type: Type.String,
@@ -92,10 +103,17 @@ export const configSchema = {
     _default: "emrtalk@musph.ac.ug",
     _description: "Support email for the system",
   },
-  footerOpenMRSLogo: {
-    _type: Type.String,
-    _default: "omrs-logo-partial-mono",
-    _description: "Choice of powered by OpenMRS logo to render",
+
+  footerLogos: {
+    _type: Type.Array,
+    _default: [
+      {
+        type: "sprite",
+        id: "omrs-logo-partial-mono",
+        alt: "OpenMRS",
+      },
+    ],
+    _description: "List of logos to display in footer",
   },
   orgUrl: {
     _type: Type.String,
